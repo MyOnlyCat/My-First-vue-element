@@ -3,73 +3,114 @@
     <el-tab-pane label="订单导出" name="first">
 
 
-      <el-form label-position="left" status-icon :rules="rules" ref="form" :model="form" label-width="6%">
-        <el-form-item label="请选择省:" >
-        <!--  ---------------------------------------------------------------------    -->
-        <el-select v-model="provinceCode" filterable disabled placeholder="请选择省"></el-select>
-        </el-form-item>
+      <el-form label-position="top" status-icon :rules="rules" ref="form" :model="form" label-width="6%">
 
-        <el-form-item label="请选择市:" prop="cityAdCode">
-        <el-select v-model="form.cityAdCode" filterable clearable placeholder="请选择市" @change="changeCity">
-          <el-option
-            v-for="item in cityModel"
-            :key="item.adcode"
-            :label="item.name"
-            :value="item.adcode">
-          </el-option>
-        </el-select>
-        </el-form-item>
+        <el-row :gutter="40">
 
-        <el-form-item label="请选择区:" >
-        <el-select v-model="form.districtCode" filterable clearable placeholder="请选择区" @change="changeDistrict">
-          <el-option
-            v-for="item in districtModel"
-            :key="item.adcode"
-            :label="item.name"
-            :value="item.adcode">
-          </el-option>
-        </el-select>
-        </el-form-item>
-
-        <el-form-item label="请选择镇(街道):" >
-        <el-select v-model="form.streetAdCode" filterable clearable placeholder="请选择镇(街道)" @change="changeStreet">
-          <el-option
-            v-for="item in streetModel"
-            :key="item.adcode"
-            :label="item.name"
-            :value="item.adcode">
-          </el-option>
-        </el-select>
-        </el-form-item>
-
-        <el-form-item label="请选择社区(村):" >
-        <el-select v-model="form.villageAdcode" filterable clearable placeholder="请选择社区(村)" @change="changeVillage">
-          <el-option
-            v-for="item in villageModel"
-            :key="item.adcode"
-            :label="item.name"
-            :value="item.adcode">
-          </el-option>
-        </el-select>
-        </el-form-item>
-
-        <el-form-item label="导出开始时间" >
-            <el-form-item prop="date1">
-              <el-date-picker type="date" placeholder="选择开始日期" v-model="form.date1" ></el-date-picker>
+          <el-divider><i class="el-icon-location">  位置选择</i></el-divider>
+          <el-col :span="4.8" >
+            <el-form-item label="请选择省:">
+              <el-select v-model="provinceCode" filterable disabled placeholder="请选择省"></el-select>
             </el-form-item>
+          </el-col>
+
+          <el-col :span="4.8">
+            <el-form-item label="请选择市:" prop="cityAdCode">
+              <el-select v-model="form.cityAdCode" filterable clearable placeholder="请选择市" @change="changeCity">
+                <el-option
+                  v-for="item in cityModel"
+                  :key="item.adcode"
+                  :label="item.name"
+                  :value="item.adcode">
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+
+          <el-col :span="4.8">
+            <el-form-item label="请选择区:">
+              <el-select v-model="form.districtCode" filterable clearable placeholder="请选择区" @change="changeDistrict">
+                <el-option
+                  v-for="item in districtModel"
+                  :key="item.adcode"
+                  :label="item.name"
+                  :value="item.adcode">
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+
+          <el-col :span="4.8">
+          <el-form-item label="请选择镇(街道):">
+            <el-select v-model="form.streetAdCode" filterable clearable placeholder="请选择镇(街道)" @change="changeStreet">
+              <el-option
+                v-for="item in streetModel"
+                :key="item.adcode"
+                :label="item.name"
+                :value="item.adcode">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          </el-col>
+
+          <el-col :span="4.8">
+          <el-form-item label="请选择社区(村):">
+            <el-select v-model="form.villageAdcode" filterable clearable placeholder="请选择社区(村)" @change="changeVillage">
+              <el-option
+                v-for="item in villageModel"
+                :key="item.adcode"
+                :label="item.name"
+                :value="item.adcode">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          </el-col>
+
+        </el-row>
+        <el-divider><i class="el-icon-setting">  其它信息选择</i></el-divider>
+
+        <el-form-item label="服务人员选择">
+          <el-input placeholder="请选择服务人员" v-model="form.name" @click.native="dialogTableVisible=true"></el-input>
+        </el-form-item>
+        <el-dialog center title="服务人员搜索" :visible.sync="dialogTableVisible">
+          <div class="serachUser">
+            <el-input size="medium" placeholder="请输入内容" v-model="input3" class="input-with-select">
+              <el-select v-model="select" slot="prepend" placeholder="搜索条件选择">
+                <el-option label="服务人员姓名" value="name"></el-option>
+                <el-option label="服务人员电话" value="phone"></el-option>
+                <el-option label="服务人员身份证" value="identityNumber"></el-option>
+              </el-select>
+              <el-button slot="append" icon="el-icon-search" @click.native="serachUser(select, input3)"></el-button>
+            </el-input>
+          </div>
+          <el-table :data="gridData">
+            <el-table-column property="name" label="姓名" width="200"></el-table-column>
+            <el-table-column property="phone" label="电话"></el-table-column>
+            <el-table-column property="identityNumber" label="身份证"></el-table-column>
+            <el-table-column property="address" label="地址"></el-table-column>
+          </el-table>
+        </el-dialog>
+
+        <!-- Table -->
+<!--        <el-button type="text" @click="dialogTableVisible = true">打开嵌套表格的 Dialog</el-button>-->
+
+
+
+        <el-form-item label="导出开始时间">
+          <el-date-picker
+            v-model="time"
+            type="daterange"
+            align="right"
+            unlink-panels
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            :picker-options="pickerOptions">
+          </el-date-picker>
         </el-form-item>
 
-        <el-form-item label="导出结束时间">
-            <el-form-item prop="date2">
-              <el-date-picker type="date" placeholder="选择结束时间" v-model="form.date2" ></el-date-picker>
-            </el-form-item>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="onSubmit('form')">立即导出</el-button>
-          <el-button>取消</el-button>
-        </el-form-item>
+
       </el-form>
-
     </el-tab-pane>
 
 
@@ -78,34 +119,70 @@
     <el-tab-pane label="异常价格订单查询" name="fourth">定时任务补偿</el-tab-pane>
   </el-tabs>
 </template>
+
+<style>
+  .serachUser .el-select .el-input {
+    width: 150px;
+  }
+  .serachUser .input-with-select .el-input-group__prepend {
+    background-color: #fff;
+  }
+</style>
+
 <script>
   export default {
     data() {
-      const checkDate1 = (rule, value, callback) => {
-        if (!value) {
-          return callback(new Error("开始时间不能为空"))
-        } else {
-          callback()
-        }
-      };
-      const checkDate2 = (rule, value, callback) => {
-        if (!value) {
-          return callback(new Error("结束时间不能为空"))
-        }
-        setTimeout(() => {
-          const start = new Date(this.form.date1).getTime();
-          const end = new Date(this.form.date2).getTime();
-          if (start > end) {
-            callback(new Error("请选择正确的时间范围"))
-          } else {
-            callback()
-          }
-        })
-      };
       return {
 
+        gridData: [],
+
+        // 时间选择器数据开始
+        pickerOptions: {
+          shortcuts: [{
+            text: '最近一周',
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+              picker.$emit('pick', [start, end]);
+            }
+          }, {
+            text: '最近一个月',
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+              picker.$emit('pick', [start, end]);
+            }
+          }, {
+            text: '最近三个月',
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+              picker.$emit('pick', [start, end]);
+            },
+
+          },{
+            text: '所有',
+            onClick(picker) {
+              picker.$emit('pick', []);
+            }
+          }]
+        },
+        time: '',
+        // 时间选择器数据结束
+
+        // dialog状态数据开始
+        dialogTableVisible: false,
+        // dialog状态数据结束
+
+        //
+        input3: '',
+        select: '',
+
         // 下拉数据开始
-        provinceCode:'四川省',
+        provinceCode: '四川省',
         cityModel: '',
         districtModel: '',
         streetModel: '',
@@ -116,9 +193,10 @@
         locationAddressStatus: '',
         // 定位下拉框选择到哪一级结束
 
+        //
         activeName: 'first',
         form: {
-          region:'',
+          region: '',
           cityAdCode: '',
           districtCode: '',
           streetAdCode: '',
@@ -129,8 +207,6 @@
         },
         rules: {
           cityAdCode: [{ required: true, message: '请选择导出范围', trigger: 'change' }],
-          date1: [{ validator: checkDate1, trigger: 'blur'}],
-          date2: [{validator: checkDate2, trigger: 'blur'}],
         }
       };
     },
@@ -143,9 +219,10 @@
         this.$refs[form].validate((valid) => {
           if (valid) {
             alert('submit!');
-            this.$http.post("/api/xixi",this.form).then(res =>{
-              console.log(1)
-            })
+            this.$http.post('/api/xixi', this.form)
+              .then(res => {
+                console.log(1);
+              });
           } else {
             console.log('error submit!!');
             return false;
@@ -161,68 +238,83 @@
         this.streetModel = null;
         this.form.villageAdcode = null;
         this.villageModel = null;
-        this.$http.get("/api/initAddressCode" + "/" + 0 + "/" + this.form.cityAdCode).then(res => {
-          this.districtModel = res.data.data;
-          // 这里需要判断用户清空的情况保证准确定位选择的位置
-          if (this.form.cityAdCode === null) {
-            this.locationAddressStatus = null;
-            console.log("清空 市 定位为 null");
-          } else {
-            this.locationAddressStatus = "district.ancestors.cityAdCode";
-            console.log("目前选择到 市 条件为: " + this.locationAddressStatus);
-          }
-        })
+        this.$http.get('/api/initAddressCode' + '/' + 0 + '/' + this.form.cityAdCode)
+          .then(res => {
+            this.districtModel = res.data.data;
+            // 这里需要判断用户清空的情况保证准确定位选择的位置
+            if (this.form.cityAdCode === null) {
+              this.locationAddressStatus = null;
+              console.log('清空 市 定位为 null');
+            } else {
+              this.locationAddressStatus = 'district.ancestors.cityAdCode';
+              console.log('目前选择到 市 条件为: ' + this.locationAddressStatus);
+            }
+          });
       },
       changeDistrict() {
         this.form.streetAdCode = null;
         this.form.streetAdCode = null;
         this.form.villageAdcode = null;
         this.villageModel = null;
-        this.$http.get("/api/initAddressCode" + "/" + 0 + "/" + this.form.districtCode).then(res => {
-          this.streetModel = res.data.data;
-          if (this.form.districtCode === null) {
-            this.locationAddressStatus = "district.ancestors.cityAdCode";
-            console.log("清空 区 定位为 跳转为上一级 定位到 市 条件为" + this.locationAddressStatus);
-          } else {
-            this.locationAddressStatus = "district.ancestors.districtAdCode";
-            console.log("目前选择到 区 条件为: " + this.locationAddressStatus);
-          }
-        })
+        this.$http.get('/api/initAddressCode' + '/' + 0 + '/' + this.form.districtCode)
+          .then(res => {
+            this.streetModel = res.data.data;
+            if (this.form.districtCode === null) {
+              this.locationAddressStatus = 'district.ancestors.cityAdCode';
+              console.log('清空 区 定位为 跳转为上一级 定位到 市 条件为' + this.locationAddressStatus);
+            } else {
+              this.locationAddressStatus = 'district.ancestors.districtAdCode';
+              console.log('目前选择到 区 条件为: ' + this.locationAddressStatus);
+            }
+          });
       },
       changeStreet() {
         this.form.villageAdcode = null;
         this.villageModel = null;
-        this.$http.get("/api/initAddressCode" + "/" + 0 + "/" + this.form.streetAdCode).then(res => {
-          this.villageModel = res.data.data;
+        this.$http.get('/api/initAddressCode' + '/' + 0 + '/' + this.form.streetAdCode)
+          .then(res => {
+            this.villageModel = res.data.data;
 
-          if (this.form.streetAdCode === null) {
-            this.locationAddressStatus = "district.ancestors.districtAdCode";
-            console.log("清空 镇/街道 定位为 跳转为上一级 定位到 区 条件为" + this.locationAddressStatus);
-          } else {
-            this.locationAddressStatus = "district.ancestors.streetAdCode";
-            console.log("目前选择到 镇/街道 条件为: " + this.locationAddressStatus);
-          }
-        })
+            if (this.form.streetAdCode === null) {
+              this.locationAddressStatus = 'district.ancestors.districtAdCode';
+              console.log('清空 镇/街道 定位为 跳转为上一级 定位到 区 条件为' + this.locationAddressStatus);
+            } else {
+              this.locationAddressStatus = 'district.ancestors.streetAdCode';
+              console.log('目前选择到 镇/街道 条件为: ' + this.locationAddressStatus);
+            }
+          });
       },
       changeVillage() {
         if (this.form.villageAdcode === null) {
-          this.locationAddressStatus = "district.ancestors.streetAdCode";
-          console.log("清空 社区/村 定位为 跳转为上一级 定位到 镇/街道 条件为" + this.locationAddressStatus);
+          this.locationAddressStatus = 'district.ancestors.streetAdCode';
+          console.log('清空 社区/村 定位为 跳转为上一级 定位到 镇/街道 条件为' + this.locationAddressStatus);
         } else {
-          this.locationAddressStatus = "district.adcode";
-          console.log("目前选择到 社区/村 条件为: " + this.locationAddressStatus);
+          this.locationAddressStatus = 'district.adcode';
+          console.log('目前选择到 社区/村 条件为: ' + this.locationAddressStatus);
         }
       },
       // 初始化市
       initAddress() {
-        this.$http.get("/api/initAddressCode" + "/" + 1 + "/" + 0).then(res => {
-          this.cityModel = res.data.data;
-        })
-      }
+        this.$http.get('/api/initAddressCode' + '/' + 1 + '/' + 0)
+          .then(res => {
+            this.cityModel = res.data.data;
+          });
+      },
+      serachUser(select,input3) {
+        const params ={
+          'selectType': select,
+          'selectParam': input3,
+        };
+        this.$http.post('/api/searchUsers',params)
+          .then(res => {
+            this.gridData = [];
+            this.gridData = res.data.data;
+          });
+      },
       //-------------------------------------------
     },
     // 页面加载完成调用初始化
-    created: function () {
+    created: function() {
       this.initAddress();
     }
   };
