@@ -6,7 +6,6 @@
       <el-form label-position="top" status-icon :rules="rules" ref="form" :model="form" label-width="6%">
 
         <el-row :gutter="40">
-
           <el-divider><i class="el-icon-location">  位置选择</i></el-divider>
           <el-col :span="4.8" >
             <el-form-item label="请选择省:">
@@ -84,11 +83,25 @@
             </el-input>
           </div>
           <el-table :data="gridData">
-            <el-table-column property="name" label="姓名" width="200"></el-table-column>
-            <el-table-column property="phone" label="电话"></el-table-column>
-            <el-table-column property="identityNumber" label="身份证"></el-table-column>
-            <el-table-column property="address" label="地址"></el-table-column>
+            <el-table-column property="name" label="姓名" width="80"></el-table-column>
+            <el-table-column property="phone" label="电话" width="250"></el-table-column>
+            <el-table-column property="identityNumber" label="身份证" width="250"></el-table-column>
+            <el-table-column property="address" label="地址" width="250"></el-table-column>
+            <el-table-column label="选择"><el-button type="primary" icon="el-icon-check" circle></el-button></el-table-column>
           </el-table>
+          <!-- @size-change 每页大小变化     @current-change  页数变化  :current-page.sync 默认选择第几页 -->
+<!--          @current-change="handleCurrentChange"-->
+          <div class="block" align="center">
+            <el-pagination
+              layout="prev, pager, next"
+              @current-change="handleCurrentChange"
+              :current-page.sync="startPageNumber"
+              :page-size="pageSize"
+              :total="totalSize"
+              :hide-on-single-page="showStatus">
+            </el-pagination>
+          </div>
+
         </el-dialog>
 
         <!-- Table -->
@@ -180,6 +193,13 @@
         //
         input3: '',
         select: '',
+
+        // 分页数据开始
+        pageSize: 5,
+        totalSize: 0,
+        startPageNumber: 1,
+        showStatus: true,
+        // 分页数据结束
 
         // 下拉数据开始
         provinceCode: '四川省',
@@ -304,11 +324,41 @@
         const params ={
           'selectType': select,
           'selectParam': input3,
+          'pageNumber': this.startPageNumber,
+          'pageSize': this.pageSize,
         };
         this.$http.post('/api/searchUsers',params)
           .then(res => {
             this.gridData = [];
-            this.gridData = res.data.data;
+            this.select = select;
+            this.input3 = input3;
+            this.gridData = res.data.data.userInfoList;
+            this.totalSize = res.data.data.count;
+            if (this.totalSize > this.pageSize) {
+              this.showStatus = false;
+            } else {
+              this.showStatus = true;
+            }
+          });
+      },
+      handleCurrentChange(val) {
+        console.log("当前页-" + val);
+        const params ={
+          'selectType': this.select,
+          'selectParam': this.input3,
+          'pageNumber': val,
+          'pageSize': this.pageSize,
+        };
+        this.$http.post('/api/searchUsers',params)
+          .then(res => {
+            this.gridData = [];
+            this.gridData = res.data.data.userInfoList;
+            this.totalSize = res.data.data.count;
+            if (this.totalSize > this.pageSize) {
+              this.showStatus = false;
+            } else {
+              this.showStatus = true;
+            }
           });
       },
       //-------------------------------------------
