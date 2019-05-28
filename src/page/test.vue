@@ -6,8 +6,8 @@
       <el-form label-position="top" status-icon :rules="rules" ref="form" :model="form" label-width="6%">
 
         <el-row :gutter="40">
-          <el-divider><i class="el-icon-location">  位置选择</i></el-divider>
-          <el-col :span="4.8" >
+          <el-divider><i class="el-icon-location"> 位置选择</i></el-divider>
+          <el-col :span="4.8">
             <el-form-item label="请选择省:">
               <el-select v-model="provinceCode" filterable disabled placeholder="请选择省"></el-select>
             </el-form-item>
@@ -40,57 +40,62 @@
           </el-col>
 
           <el-col :span="4.8">
-          <el-form-item label="请选择镇(街道):">
-            <el-select v-model="form.streetAdCode" filterable clearable placeholder="请选择镇(街道)" @change="changeStreet">
-              <el-option
-                v-for="item in streetModel"
-                :key="item.adcode"
-                :label="item.name"
-                :value="item.adcode">
-              </el-option>
-            </el-select>
-          </el-form-item>
+            <el-form-item label="请选择镇(街道):">
+              <el-select v-model="form.streetAdCode" filterable clearable placeholder="请选择镇(街道)" @change="changeStreet">
+                <el-option
+                  v-for="item in streetModel"
+                  :key="item.adcode"
+                  :label="item.name"
+                  :value="item.adcode">
+                </el-option>
+              </el-select>
+            </el-form-item>
           </el-col>
 
           <el-col :span="4.8">
-          <el-form-item label="请选择社区(村):">
-            <el-select v-model="form.villageAdcode" filterable clearable placeholder="请选择社区(村)" @change="changeVillage">
-              <el-option
-                v-for="item in villageModel"
-                :key="item.adcode"
-                :label="item.name"
-                :value="item.adcode">
-              </el-option>
-            </el-select>
-          </el-form-item>
+            <el-form-item label="请选择社区(村):">
+              <el-select v-model="form.villageAdcode" filterable clearable placeholder="请选择社区(村)"
+                         @change="changeVillage">
+                <el-option
+                  v-for="item in villageModel"
+                  :key="item.adcode"
+                  :label="item.name"
+                  :value="item.adcode">
+                </el-option>
+              </el-select>
+            </el-form-item>
           </el-col>
 
         </el-row>
-        <el-divider><i class="el-icon-setting">  其它信息选择</i></el-divider>
+        <el-divider><i class="el-icon-setting"> 其它信息选择</i></el-divider>
 
         <el-form-item label="服务人员选择">
-          <el-input placeholder="请选择服务人员" v-model="form.name" @click.native="dialogTableVisible=true"></el-input>
+          <el-input placeholder="请选择服务人员" readonly=true v-model="form.name" @click.native="dialogTableVisible=true"></el-input>
         </el-form-item>
         <el-dialog center title="服务人员搜索" :visible.sync="dialogTableVisible">
           <div class="serachUser">
-            <el-input size="medium" placeholder="请输入内容" v-model="input3" class="input-with-select">
-              <el-select v-model="select" slot="prepend" placeholder="搜索条件选择">
+            <el-input size="medium" placeholder="请输入内容" v-model="selectInput" @keyup.enter.native="serachUser(selectType, selectInput)" class="input-with-select">
+              <el-select v-model="selectType" slot="prepend" placeholder="搜索条件选择">
                 <el-option label="服务人员姓名" value="name"></el-option>
                 <el-option label="服务人员电话" value="phone"></el-option>
                 <el-option label="服务人员身份证" value="identityNumber"></el-option>
               </el-select>
-              <el-button slot="append" icon="el-icon-search" @click.native="serachUser(select, input3)"></el-button>
+              <el-button slot="append" icon="el-icon-search" @click.native="serachUser(selectType, selectInput)"></el-button>
             </el-input>
           </div>
-          <el-table :data="gridData">
+          <el-table :data="gridData" v-loading="loadingTable" element-loading-text="拼命加载中">
             <el-table-column property="name" label="姓名" width="80"></el-table-column>
-            <el-table-column property="phone" label="电话" width="250"></el-table-column>
+            <el-table-column property="phone" label="电话" width="200"></el-table-column>
             <el-table-column property="identityNumber" label="身份证" width="250"></el-table-column>
             <el-table-column property="address" label="地址" width="250"></el-table-column>
-            <el-table-column label="选择"><el-button type="primary" icon="el-icon-check" circle></el-button></el-table-column>
+            <el-table-column label="选择">
+              <template slot-scope="scope">
+              <el-button size="mini" @click.native="SelectTheUser(scope.row)">选中</el-button>
+              </template>
+            </el-table-column>
           </el-table>
           <!-- @size-change 每页大小变化     @current-change  页数变化  :current-page.sync 默认选择第几页 -->
-<!--          @current-change="handleCurrentChange"-->
+          <!--          @current-change="handleCurrentChange"-->
           <div class="block" align="center">
             <el-pagination
               layout="prev, pager, next"
@@ -105,8 +110,7 @@
         </el-dialog>
 
         <!-- Table -->
-<!--        <el-button type="text" @click="dialogTableVisible = true">打开嵌套表格的 Dialog</el-button>-->
-
+        <!--        <el-button type="text" @click="dialogTableVisible = true">打开嵌套表格的 Dialog</el-button>-->
 
 
         <el-form-item label="导出开始时间">
@@ -137,6 +141,7 @@
   .serachUser .el-select .el-input {
     width: 150px;
   }
+
   .serachUser .input-with-select .el-input-group__prepend {
     background-color: #fff;
   }
@@ -176,7 +181,7 @@
               picker.$emit('pick', [start, end]);
             },
 
-          },{
+          }, {
             text: '所有',
             onClick(picker) {
               picker.$emit('pick', []);
@@ -190,9 +195,14 @@
         dialogTableVisible: false,
         // dialog状态数据结束
 
-        //
-        input3: '',
-        select: '',
+        // 加载遮罩开始(默认不遮盖)
+        loadingTable: false,
+        // 加载遮罩结束(默认不遮盖)
+
+        //搜索框内容选择以及内容输入开始
+        selectInput: '',
+        selectType: '',
+        //搜索框内容选择以及内容输入结束
 
         // 分页数据开始
         pageSize: 5,
@@ -200,6 +210,12 @@
         startPageNumber: 1,
         showStatus: true,
         // 分页数据结束
+
+        //分页数据选中
+        userInfo: {
+          name: '',
+          id: ''
+        },
 
         // 下拉数据开始
         provinceCode: '四川省',
@@ -223,7 +239,6 @@
           villageAdcode: '',
           date1: '',
           date2: '',
-
         },
         rules: {
           cityAdCode: [{ required: true, message: '请选择导出范围', trigger: 'change' }],
@@ -234,6 +249,52 @@
       handleClick(tab, event) {
         console.log(tab, event);
       },
+
+      SelectTheUser(rowInfo) {
+        // 赋值给全局量
+        this.userInfo.name = rowInfo.name;
+        this.userInfo.id = rowInfo.id;
+        // 给输入框展示
+        this.form.name = this.userInfo.name;
+        // 关闭Dialog
+        this.dialogTableVisible = false;
+      },
+
+      /**
+       *  搜索检查条件
+       * @param selectType
+       * @param selectInput
+       * @returns {boolean}
+       */
+      check(selectType, selectInput) {
+        console.log(selectType);
+        if (selectType === '' && selectInput === '') {
+          this.$message({
+            message: '请选择查询条件!',
+            center: true,
+            type: 'error'
+          });
+          return false
+        } else if (selectType === '' || selectType === null) {
+          this.$message({
+            message: '请选择查询条件!',
+            center: true,
+            type: 'error'
+          });
+          return false
+        } else if (selectInput === '' || selectInput === null) {
+          this.$message({
+            message: '请输入查询内容!',
+            center: true,
+            type: 'error'
+          });
+          return false
+        } else {
+          return true
+        }
+      },
+
+
 
       onSubmit(form) {
         this.$refs[form].validate((valid) => {
@@ -320,46 +381,56 @@
             this.cityModel = res.data.data;
           });
       },
-      serachUser(select,input3) {
-        const params ={
-          'selectType': select,
-          'selectParam': input3,
-          'pageNumber': this.startPageNumber,
-          'pageSize': this.pageSize,
-        };
-        this.$http.post('/api/searchUsers',params)
-          .then(res => {
-            this.gridData = [];
-            this.select = select;
-            this.input3 = input3;
-            this.gridData = res.data.data.userInfoList;
-            this.totalSize = res.data.data.count;
-            if (this.totalSize > this.pageSize) {
-              this.showStatus = false;
-            } else {
-              this.showStatus = true;
-            }
-          });
+      serachUser(selectType, selectInput) {
+        const res = this.check(selectType, selectInput);
+
+        if (res) {
+          this.loadingTable = true;
+          console.log("加载情况" + this.loadingTable);
+
+          const params = {
+            'selectType': selectType,
+            'selectParam': selectInput,
+            'pageNumber': this.startPageNumber,
+            'pageSize': this.pageSize,
+          };
+          this.$http.post('/api/searchUsers', params)
+            .then(res => {
+              this.gridData = [];
+              this.select = selectType;
+              this.selectInput = selectInput;
+              this.gridData = res.data.data.userInfoList;
+              this.totalSize = res.data.data.count;
+              this.loadingTable = false
+            });
+        } else {
+          this.gridData = [];
+          this.selectInput = '';
+          this.totalSize = 0;
+        }
       },
       handleCurrentChange(val) {
-        console.log("当前页-" + val);
-        const params ={
-          'selectType': this.select,
-          'selectParam': this.input3,
-          'pageNumber': val,
-          'pageSize': this.pageSize,
-        };
-        this.$http.post('/api/searchUsers',params)
-          .then(res => {
-            this.gridData = [];
-            this.gridData = res.data.data.userInfoList;
-            this.totalSize = res.data.data.count;
-            if (this.totalSize > this.pageSize) {
-              this.showStatus = false;
-            } else {
-              this.showStatus = true;
-            }
-          });
+        const res = this.check(this.selectType, this.selectInput);
+        if (res) {
+          this.loadingTable = true;
+          const params = {
+            'selectType': this.selectType,
+            'selectParam': this.selectInput,
+            'pageNumber': val,
+            'pageSize': this.pageSize,
+          };
+          this.$http.post('/api/searchUsers', params)
+            .then(res => {
+              this.gridData = [];
+              this.gridData = res.data.data.userInfoList;
+              this.totalSize = res.data.data.count;
+              this.loadingTable = false;
+            });
+        } else {
+          this.gridData = [];
+          this.selectInput = '';
+          this.totalSize = 0;
+        }
       },
       //-------------------------------------------
     },
