@@ -68,46 +68,32 @@
 
         </el-row>
         <el-divider><i class="el-icon-setting"> 其它信息选择</i></el-divider>
+        <el-row :gutter="40">
+          <el-col :span="4.8">
+            <el-form-item label="服务人员选择">
+              <el-input placeholder="请选择服务人员" :readonly=true v-model="form.name" suffix-icon="el-icon-user"
+                        @click.native="changeSelectUserDialogTableVisibleStatus"></el-input>
+            </el-form-item>
+            <!--
+            这里引用子组件  ref="userSelect" 获取子组件的元素 使用 this.$refs.userSelect.  可调用修改子组件的属性
+             @watchChild 监听子组件调用父组件,watchChild背子组件触发则调用父组件的 SelectTheUser方法
+            -->
+            <user-select ref="userSelect" @watchChild="SelectTheUser"></user-select>
+          </el-col>
 
-        <el-form-item label="服务人员选择">
-          <el-input placeholder="请选择服务人员" readonly=true v-model="form.name" @click.native="dialogTableVisible=true"></el-input>
-        </el-form-item>
-        <el-dialog center title="服务人员搜索" :visible.sync="dialogTableVisible">
-          <div class="serachUser">
-            <el-input size="medium" placeholder="请输入内容" v-model="selectInput" @keyup.enter.native="serachUser(selectType, selectInput)" class="input-with-select">
-              <el-select v-model="selectType" slot="prepend" placeholder="搜索条件选择">
-                <el-option label="服务人员姓名" value="name"></el-option>
-                <el-option label="服务人员电话" value="phone"></el-option>
-                <el-option label="服务人员身份证" value="identityNumber"></el-option>
-              </el-select>
-              <el-button slot="append" icon="el-icon-search" @click.native="serachUser(selectType, selectInput)"></el-button>
-            </el-input>
-          </div>
-          <el-table :data="gridData" v-loading="loadingTable" element-loading-text="拼命加载中">
-            <el-table-column property="name" label="姓名" width="80"></el-table-column>
-            <el-table-column property="phone" label="电话" width="200"></el-table-column>
-            <el-table-column property="identityNumber" label="身份证" width="250"></el-table-column>
-            <el-table-column property="address" label="地址" width="250"></el-table-column>
-            <el-table-column label="选择">
-              <template slot-scope="scope">
-              <el-button size="mini" @click.native="SelectTheUser(scope.row)">选中</el-button>
-              </template>
-            </el-table-column>
-          </el-table>
-          <!-- @size-change 每页大小变化     @current-change  页数变化  :current-page.sync 默认选择第几页 -->
-          <!--          @current-change="handleCurrentChange"-->
-          <div class="block" align="center">
-            <el-pagination
-              layout="prev, pager, next"
-              @current-change="handleCurrentChange"
-              :current-page.sync="startPageNumber"
-              :page-size="pageSize"
-              :total="totalSize"
-              :hide-on-single-page="showStatus">
-            </el-pagination>
-          </div>
+          <el-col :span="4.8">
+            <el-form-item label="老人姓名">
+              <el-input placeholder="请选择服务人员" :readonly=true v-model="form.oldManName" suffix-icon="el-icon-user"
+                        @click.native="changeSelectOldManDialogTableVisibleStatus"></el-input>
+            </el-form-item>
+            <!--
+            这里引用子组件  ref="userSelect" 获取子组件的元素 使用 this.$refs.userSelect.  可调用修改子组件的属性
+             @watchChild 监听子组件调用父组件,watchChild背子组件触发则调用父组件的 SelectTheUser方法
+            -->
+            <oldMan-select ref="oldManSelect" @watchChild="SelectTheOldMan"></oldMan-select>
+          </el-col>
 
-        </el-dialog>
+        </el-row>
 
         <!-- Table -->
         <!--        <el-button type="text" @click="dialogTableVisible = true">打开嵌套表格的 Dialog</el-button>-->
@@ -148,12 +134,15 @@
 </style>
 
 <script>
+  import userSelect from "../components/UserSelection"
+  import oldManSelect from "../components/OldManSelection"
   export default {
+    components: {
+      'user-select':userSelect,
+      'oldMan-select': oldManSelect
+    },
     data() {
       return {
-
-        gridData: [],
-
         // 时间选择器数据开始
         pickerOptions: {
           shortcuts: [{
@@ -191,31 +180,19 @@
         time: '',
         // 时间选择器数据结束
 
-        // dialog状态数据开始
-        dialogTableVisible: false,
-        // dialog状态数据结束
-
-        // 加载遮罩开始(默认不遮盖)
-        loadingTable: false,
-        // 加载遮罩结束(默认不遮盖)
-
-        //搜索框内容选择以及内容输入开始
-        selectInput: '',
-        selectType: '',
-        //搜索框内容选择以及内容输入结束
-
-        // 分页数据开始
-        pageSize: 5,
-        totalSize: 0,
-        startPageNumber: 1,
-        showStatus: true,
-        // 分页数据结束
-
-        //分页数据选中
+        // 分页数据选中开始
         userInfo: {
           name: '',
           id: ''
         },
+        // 分页数据选中结束
+
+        // 老人信息开始
+        oldManInfo: {
+          name: '',
+          id: ''
+        },
+        // 老人信息结束
 
         // 下拉数据开始
         provinceCode: '四川省',
@@ -239,6 +216,8 @@
           villageAdcode: '',
           date1: '',
           date2: '',
+          name: '',
+          oldManName:'',
         },
         rules: {
           cityAdCode: [{ required: true, message: '请选择导出范围', trigger: 'change' }],
@@ -250,6 +229,24 @@
         console.log(tab, event);
       },
 
+      /**
+       *  通过$refs.userSelect 修改子组件的dialog显示状态
+       */
+      changeSelectUserDialogTableVisibleStatus() {
+        this.$refs.userSelect.dialogTableVisible=true
+      },
+
+      changeSelectOldManDialogTableVisibleStatus() {
+        this.$refs.oldManSelect.dialogTableVisible=true
+      },
+
+      /**
+       * 负责处理子组件传过来的行信息
+       * 修改dialog的显示状态
+       * 赋值给 userInfo 方便保存以及传值
+       * @param rowInfo 选中的行信息
+       * @constructor
+       */
       SelectTheUser(rowInfo) {
         // 赋值给全局量
         this.userInfo.name = rowInfo.name;
@@ -257,44 +254,25 @@
         // 给输入框展示
         this.form.name = this.userInfo.name;
         // 关闭Dialog
-        this.dialogTableVisible = false;
+        this.$refs.userSelect.dialogTableVisible = false;
       },
 
       /**
-       *  搜索检查条件
-       * @param selectType
-       * @param selectInput
-       * @returns {boolean}
+       * 负责处理子组件传过来的行信息
+       * 修改dialog的显示状态
+       * 赋值给 oldManInfo 方便保存以及传值
+       * @param rowInfo 选中的行信息
+       * @constructor
        */
-      check(selectType, selectInput) {
-        console.log(selectType);
-        if (selectType === '' && selectInput === '') {
-          this.$message({
-            message: '请选择查询条件!',
-            center: true,
-            type: 'error'
-          });
-          return false
-        } else if (selectType === '' || selectType === null) {
-          this.$message({
-            message: '请选择查询条件!',
-            center: true,
-            type: 'error'
-          });
-          return false
-        } else if (selectInput === '' || selectInput === null) {
-          this.$message({
-            message: '请输入查询内容!',
-            center: true,
-            type: 'error'
-          });
-          return false
-        } else {
-          return true
-        }
+      SelectTheOldMan(rowInfo) {
+        // 赋值给全局量
+        this.oldManInfo.name = rowInfo.name;
+        this.oldManInfo.id = rowInfo.id;
+        // 给输入框展示
+        this.form.oldManName = this.oldManInfo.name;
+        // 关闭Dialog
+        this.$refs.oldManSelect.dialogTableVisible = false;
       },
-
-
 
       onSubmit(form) {
         this.$refs[form].validate((valid) => {
@@ -380,57 +358,6 @@
           .then(res => {
             this.cityModel = res.data.data;
           });
-      },
-      serachUser(selectType, selectInput) {
-        const res = this.check(selectType, selectInput);
-
-        if (res) {
-          this.loadingTable = true;
-          console.log("加载情况" + this.loadingTable);
-
-          const params = {
-            'selectType': selectType,
-            'selectParam': selectInput,
-            'pageNumber': this.startPageNumber,
-            'pageSize': this.pageSize,
-          };
-          this.$http.post('/api/searchUsers', params)
-            .then(res => {
-              this.gridData = [];
-              this.select = selectType;
-              this.selectInput = selectInput;
-              this.gridData = res.data.data.userInfoList;
-              this.totalSize = res.data.data.count;
-              this.loadingTable = false
-            });
-        } else {
-          this.gridData = [];
-          this.selectInput = '';
-          this.totalSize = 0;
-        }
-      },
-      handleCurrentChange(val) {
-        const res = this.check(this.selectType, this.selectInput);
-        if (res) {
-          this.loadingTable = true;
-          const params = {
-            'selectType': this.selectType,
-            'selectParam': this.selectInput,
-            'pageNumber': val,
-            'pageSize': this.pageSize,
-          };
-          this.$http.post('/api/searchUsers', params)
-            .then(res => {
-              this.gridData = [];
-              this.gridData = res.data.data.userInfoList;
-              this.totalSize = res.data.data.count;
-              this.loadingTable = false;
-            });
-        } else {
-          this.gridData = [];
-          this.selectInput = '';
-          this.totalSize = 0;
-        }
       },
       //-------------------------------------------
     },

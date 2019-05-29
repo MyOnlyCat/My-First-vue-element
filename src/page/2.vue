@@ -7,44 +7,12 @@
 
       <!--  11      -->
         <addressSelect :form="form"></addressSelect>
-        <el-divider><i class="el-icon-setting">  其它信息选择</i></el-divider>
-
         <el-form-item label="服务人员选择">
-          <el-input placeholder="请选择服务人员" v-model="form.name" @click.native="dialogTableVisible=true"></el-input>
+          <el-input placeholder="请选择服务人员" :readonly=true v-model="form.name"
+                    @click.native="changeDialogTableVisibleStatus"></el-input>
         </el-form-item>
-        <el-dialog center title="服务人员搜索" :visible.sync="dialogTableVisible">
-          <div class="serachUser">
-            <el-input size="medium" placeholder="请输入内容" v-model="input3" class="input-with-select">
-              <el-select v-model="select" slot="prepend" placeholder="搜索条件选择">
-                <el-option label="服务人员姓名" value="name"></el-option>
-                <el-option label="服务人员电话" value="phone"></el-option>
-                <el-option label="服务人员身份证" value="identityNumber"></el-option>
-              </el-select>
-              <el-button slot="append" icon="el-icon-search" @click.native="serachUser(select, input3)"></el-button>
-            </el-input>
-          </div>
-          <el-table :data="gridData">
-            <el-table-column property="name" label="姓名" width="80"></el-table-column>
-            <el-table-column property="phone" label="电话" width="250"></el-table-column>
-            <el-table-column property="identityNumber" label="身份证" width="250"></el-table-column>
-            <el-table-column property="address" label="地址" width="250"></el-table-column>
-            <el-table-column label="选择"><el-button type="primary" icon="el-icon-check" circle></el-button></el-table-column>
-          </el-table>
-          <!-- @size-change 每页大小变化     @current-change  页数变化  :current-page.sync 默认选择第几页 -->
-          <!--          @current-change="handleCurrentChange"-->
-          <div class="block" align="center">
-            <el-pagination
-              layout="prev, pager, next"
-              @current-change="handleCurrentChange"
-              :current-page.sync="startPageNumber"
-              :page-size="pageSize"
-              :total="totalSize"
-              :hide-on-single-page="showStatus">
-            </el-pagination>
-          </div>
-
-        </el-dialog>
-
+        <userSelect ref="userSelect" @watchChild="SelectTheUser"></userSelect>
+        <el-divider><i class="el-icon-setting">  其它信息选择</i></el-divider>
         <!-- Table -->
         <!--        <el-button type="text" @click="dialogTableVisible = true">打开嵌套表格的 Dialog</el-button>-->
 
@@ -85,12 +53,11 @@
 
 <script>
   import addressSelect from "../components/AddressSelect"
+  import userSelect from "../components/UserSelection"
   export default {
-    components: {addressSelect},
+    components: {addressSelect,userSelect},
     data() {
       return {
-
-        gridData: [],
 
         // 时间选择器数据开始
         pickerOptions: {
@@ -129,27 +96,14 @@
         time: '',
         // 时间选择器数据结束
 
-        // dialog状态数据开始
-        dialogTableVisible: false,
-        // dialog状态数据结束
-
-        //
-        input3: '',
-        select: '',
-
-        // 分页数据开始
-        pageSize: 5,
-        totalSize: 0,
-        startPageNumber: 1,
-        showStatus: true,
-        // 分页数据结束
-
-
-
-
-
         //
         activeName: 'first',
+
+        userInfo: {
+          name: '',
+          id: ''
+        },
+
         form: {
           region: '',
           cityAdCode: '',
@@ -158,7 +112,7 @@
           villageAdcode: '',
           date1: '',
           date2: '',
-
+          name:'',
         },
         rules: {
           cityAdCode: [{ required: true, message: '请选择导出范围', trigger: 'change' }],
@@ -169,7 +123,9 @@
       handleClick(tab, event) {
         console.log(tab, event);
       },
-
+      changeDialogTableVisibleStatus() {
+        this.$refs.userSelect.dialogTableVisible=true
+      },
       onSubmit(form) {
         this.$refs[form].validate((valid) => {
           if (valid) {
@@ -185,47 +141,15 @@
         });
       },
 
-
-      serachUser(select,input3) {
-        const params ={
-          'selectType': select,
-          'selectParam': input3,
-          'pageNumber': this.startPageNumber,
-          'pageSize': this.pageSize,
-        };
-        this.$http.post('/api/searchUsers',params)
-          .then(res => {
-            this.gridData = [];
-            this.select = select;
-            this.input3 = input3;
-            this.gridData = res.data.data.userInfoList;
-            this.totalSize = res.data.data.count;
-            if (this.totalSize > this.pageSize) {
-              this.showStatus = false;
-            } else {
-              this.showStatus = true;
-            }
-          });
-      },
-      handleCurrentChange(val) {
-        console.log("当前页-" + val);
-        const params ={
-          'selectType': this.select,
-          'selectParam': this.input3,
-          'pageNumber': val,
-          'pageSize': this.pageSize,
-        };
-        this.$http.post('/api/searchUsers',params)
-          .then(res => {
-            this.gridData = [];
-            this.gridData = res.data.data.userInfoList;
-            this.totalSize = res.data.data.count;
-            if (this.totalSize > this.pageSize) {
-              this.showStatus = false;
-            } else {
-              this.showStatus = true;
-            }
-          });
+      SelectTheUser(rowInfo) {
+        console.log(rowInfo)
+        // 赋值给全局量
+        this.userInfo.name = rowInfo.name;
+        this.userInfo.id = rowInfo.id;
+        // 给输入框展示
+        this.form.name = this.userInfo.name;
+        // 关闭Dialog
+        this.$refs.userSelect.dialogTableVisible=false
       },
       //-------------------------------------------
     }
