@@ -5,7 +5,7 @@
 
       <el-form label-position="top" status-icon :rules="rules" ref="form" :model="form" label-width="6%">
         <el-divider><i class="el-icon-location"> 位置选择</i></el-divider>
-        <address-select :form="form"></address-select>
+        <address-select ref="addressSelectRef" :form="form"></address-select>
 
         <el-divider><i class="el-icon-setting"> 其它信息选择</i></el-divider>
         <el-row :gutter="40">
@@ -23,7 +23,7 @@
 
           <el-col :span="4.8">
             <el-form-item label="老人选择:">
-              <el-input placeholder="请选择服务人员" :readonly=true v-model="form.oldManName" suffix-icon="el-icon-user"
+              <el-input placeholder="请选择服务人员"  :readonly=true v-model="form.oldManName" suffix-icon="el-icon-user"
                         @click.native="changeSelectOldManDialogTableVisibleStatus"></el-input>
             </el-form-item>
             <!--
@@ -35,7 +35,7 @@
 
           <el-col :span="4.8">
             <el-form-item label="合同选择:">
-              <project-select></project-select>
+              <project-select ref="projectSelectRef"></project-select>
             </el-form-item>
           </el-col>
 
@@ -54,7 +54,7 @@
 
           <el-col :span="4.8">
             <el-form-item label="时间区间选择:">
-              <time-select></time-select>
+              <time-select ref="timeSelect"></time-select>
             </el-form-item>
           </el-col>
 
@@ -62,16 +62,16 @@
         <el-divider><i class="el-icon-download"> 下载信息配置</i></el-divider>
         <el-row :gutter="40">
           <el-col :span="4.8">
-            <el-form-item label="下载用户信息填写(用于提取文件):">
+            <el-form-item label="下载用户信息填写(用于提取文件):" prop="downlodName">
               <el-input
                 placeholder="请输入下载用户信息"
-                v-model="input"
+                v-model="form.downlodName"
                 clearable>
               </el-input>
             </el-form-item>
           </el-col>
         </el-row>
-        <el-button type="primary">下载<i class="el-icon-download el-icon--right"></i></el-button>
+        <el-button type="primary" @click="onSubmit">下载<i class="el-icon-download el-icon--right"></i></el-button>
       </el-form>
     </el-tab-pane>
 
@@ -136,21 +136,21 @@
           }
         ],
 
+
         //
         activeName: 'first',
         form: {
-          region: '',
           cityAdCode: '',
           districtCode: '',
           streetAdCode: '',
           villageAdcode: '',
-          date1: '',
-          date2: '',
           name: '',
           oldManName: '',
+          downlodName: '',
         },
         rules: {
           cityAdCode: [{ required: true, message: '请选择导出范围', trigger: 'change' }],
+          downlodName: [{ required: true, message: '请输入导出姓名', trigger: 'change' }],
         }
       };
     },
@@ -205,13 +205,33 @@
       },
 
       onSubmit(form) {
-        this.$refs[form].validate((valid) => {
+        this.$refs.form.validate((valid) => {
           if (valid) {
-            alert('submit!');
-            this.$http.post('/api/xixi', this.form)
+
+            const data = {
+              // 地区定位可以直接取
+              'addressSelect': this.$refs.addressSelectRef.locationAddressStatus,
+              // 地区code可以直接取
+              'addressCode': this.$refs.addressSelectRef.locationAddressCode,
+              // 服务人员
+              'userId': this.userInfo.id,
+              // 老人信息
+              'oldManId': this.oldManInfo.id,
+              // 合同信息
+              'projectId': this.$refs.projectSelectRef.value,
+              // 订单状态
+              'orderStatus': this.orderStatusValue,
+              // 时间区间
+              'timeStart': this.$refs.timeSelect.time[0],
+              'timeEnd': this.$refs.timeSelect.time[1],
+              // 下载关联的用户信息
+              'dowbloadName': this.form.downlodName
+            };
+            this.$http.post('/api/downLoadOrderExcle', data)
               .then(res => {
-                console.log(1);
+
               });
+            console.log(data);
           } else {
             console.log('error submit!!');
             return false;

@@ -81,6 +81,7 @@
         // 定位下拉框选择到哪一级开始
         locationAddressStatus: '',
         // 定位下拉框选择到哪一级结束
+        locationAddressCode: "",
       }
     },
     methods: {
@@ -101,24 +102,29 @@
               console.log('清空 市 定位为 null');
             } else {
               this.locationAddressStatus = 'district.ancestors.cityAdCode';
-              console.log('目前选择到 市 条件为: ' + this.locationAddressStatus);
+              this.locationAddressCode = this.form.cityAdCode;
+              console.log('目前选择到 市 条件为: ' + this.locationAddressStatus + " Code为 " + this.locationAddressCode);
             }
           });
       },
       changeDistrict() {
+
         this.form.streetAdCode = null;
-        this.form.streetAdCode = null;
+        this.streetModel = null;
         this.form.villageAdcode = null;
         this.villageModel = null;
+
         this.$http.get('/api/initAddressCode' + '/' + 0 + '/' + this.form.districtCode)
           .then(res => {
             this.streetModel = res.data.data;
             if (this.form.districtCode === null) {
               this.locationAddressStatus = 'district.ancestors.cityAdCode';
-              console.log('清空 区 定位为 跳转为上一级 定位到 市 条件为' + this.locationAddressStatus);
+              this.locationAddressCode = this.form.cityAdCode;
+              console.log('清空 区 定位为 跳转为上一级 定位到 市 条件为' + this.locationAddressStatus + " Code为 " + this.locationAddressCode);
             } else {
               this.locationAddressStatus = 'district.ancestors.districtAdCode';
-              console.log('目前选择到 区 条件为: ' + this.locationAddressStatus);
+              this.locationAddressCode = this.form.districtCode;
+              console.log('目前选择到 区 条件为: ' + this.locationAddressStatus + " Code为 " + this.locationAddressCode);
             }
           });
       },
@@ -128,23 +134,26 @@
         this.$http.get('/api/initAddressCode' + '/' + 0 + '/' + this.form.streetAdCode)
           .then(res => {
             this.villageModel = res.data.data;
-
             if (this.form.streetAdCode === null) {
               this.locationAddressStatus = 'district.ancestors.districtAdCode';
-              console.log('清空 镇/街道 定位为 跳转为上一级 定位到 区 条件为' + this.locationAddressStatus);
+              this.locationAddressCode = this.form.districtCode;
+              console.log('清空 镇/街道 定位为 跳转为上一级 定位到 区 条件为' + this.locationAddressStatus + " Code为 " + this.locationAddressCode);
             } else {
               this.locationAddressStatus = 'district.ancestors.streetAdCode';
-              console.log('目前选择到 镇/街道 条件为: ' + this.locationAddressStatus);
+              this.locationAddressCode = this.form.streetAdCode;
+              console.log('目前选择到 镇/街道 条件为: ' + this.locationAddressStatus + " Code为 " + this.locationAddressCode);
             }
           });
       },
       changeVillage() {
         if (this.form.villageAdcode === null) {
           this.locationAddressStatus = 'district.ancestors.streetAdCode';
-          console.log('清空 社区/村 定位为 跳转为上一级 定位到 镇/街道 条件为' + this.locationAddressStatus);
+          this.locationAddressCode = this.form.streetAdCode;
+          console.log('清空 社区/村 定位为 跳转为上一级 定位到 镇/街道 条件为' + this.locationAddressStatus + " Code为 " + this.locationAddressCode);
         } else {
           this.locationAddressStatus = 'district.adcode';
-          console.log('目前选择到 社区/村 条件为: ' + this.locationAddressStatus);
+          this.locationAddressCode = this.form.villageAdcode;
+          console.log('目前选择到 社区/村 条件为: ' + this.locationAddressStatus + " Code为 " + this.locationAddressCode);
         }
       },
       // 初始化市
