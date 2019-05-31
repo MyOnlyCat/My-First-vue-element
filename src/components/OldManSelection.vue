@@ -93,6 +93,10 @@
         }
       },
 
+      /**
+       * 页码变化查询
+       * @param val 当前
+       */
       handleCurrentChange(val) {
         const res = this.check(this.selectInput);
         if (res) {
@@ -118,7 +122,10 @@
         }
       },
 
-
+      /**
+       *  这里是 回车 和 查询按钮 触发的查询方法 点击过后应该是触发重新查询当前页码应该变为 1
+       * @param selectInput 输入框输入的查询条件
+       */
       serachUser(selectInput) {
         const res = this.check(selectInput);
 
@@ -129,7 +136,7 @@
           const params = {
             'selectType': this.selectType,
             'selectParam': selectInput,
-            'pageNumber': this.startPageNumber,
+            'pageNumber': 1,
             'pageSize': this.pageSize,
             'selectProperty': this.selectProperty,
           };

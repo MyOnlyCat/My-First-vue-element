@@ -76,17 +76,12 @@
     },
     methods: {
 
+      /**
+       *  触发父组件的选中方法
+       * @param rowInfo
+       */
       SelectTheUser(rowInfo) {
-        console.log(rowInfo)
-        // this.$emit.SelectTheUser(rowInfo)
         this.$emit('watchChild', rowInfo);
-        // // 赋值给全局量
-        // this.userInfo.name = rowInfo.name;
-        // this.userInfo.id = rowInfo.id;
-        // // 给输入框展示
-        // this.form.name = this.userInfo.name;
-        // // 关闭Dialog
-        // this.dialogTableVisible = false;
       },
 
       /**
@@ -159,7 +154,7 @@
           const params = {
             'selectType': selectType,
             'selectParam': selectInput,
-            'pageNumber': this.startPageNumber,
+            'pageNumber': 1,
             'pageSize': this.pageSize,
             'selectProperty': this.selectProperty,
           };

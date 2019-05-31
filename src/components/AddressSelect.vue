@@ -1,7 +1,6 @@
 <template>
     <div class="address-select">
       <el-row :gutter="40">
-        <el-divider><i class="el-icon-location">  位置选择</i></el-divider>
         <el-col :span="4.8" >
           <el-form-item label="请选择省:">
             <el-select v-model="provinceCode" filterable disabled placeholder="请选择省"></el-select>
